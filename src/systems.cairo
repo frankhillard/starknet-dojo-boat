@@ -21,10 +21,10 @@ mod spawn {
         set!(
             ctx.world,
             (
-                Wind { cell_x: 0, cell_y: 0, wx: FixedTrait::new_unscaled(1, false), wy:FixedTrait::new_unscaled(1, false) },
-                Wind { cell_x: 0, cell_y: 1, wx: FixedTrait::new_unscaled(1, false), wy:FixedTrait::new_unscaled(1, true) },
-                Wind { cell_x: 1, cell_y: 1, wx: FixedTrait::new_unscaled(0, false), wy:FixedTrait::new_unscaled(0, false) },
-                Wind { cell_x: 1, cell_y: 0, wx: FixedTrait::new_unscaled(0, false), wy:FixedTrait::new_unscaled(0, false) },
+                Wind { cell_x: 0, cell_y: 0, wx: FixedTrait::new_unscaled(1, false), wy:FixedTrait::new_unscaled(1, false), speed: FixedTrait::new_unscaled(6, false) },
+                Wind { cell_x: 0, cell_y: 1, wx: FixedTrait::new_unscaled(1, false), wy:FixedTrait::new_unscaled(1, true), speed: FixedTrait::new_unscaled(6, false) },
+                Wind { cell_x: 1, cell_y: 1, wx: FixedTrait::new_unscaled(0, false), wy:FixedTrait::new_unscaled(0, false), speed: FixedTrait::new_unscaled(6, false) },
+                Wind { cell_x: 1, cell_y: 0, wx: FixedTrait::new_unscaled(0, false), wy:FixedTrait::new_unscaled(0, false), speed: FixedTrait::new_unscaled(6, false) },
                 Position { 
                     player: ctx.origin, 
                     x: FixedTrait::new_unscaled(offset.into(), false), 
@@ -59,10 +59,8 @@ mod move {
         let mut cur_wind = get!(ctx.world, cur_wind_cell, Wind);
         let wx : Fixed = cur_wind.wx;
         let wy : Fixed = cur_wind.wy;
-        let next = PositionTrait::step(position, wx, wy); 
-        // next.x.print();
-        // next.y.print();
-        // '[move] after step'.print();
+        let wind_spd = cur_wind.speed;
+        let next = PositionTrait::step(position, wx, wy, wind_spd); 
         set!(ctx.world, (next));
         emit!(ctx.world, Moved { player: ctx.origin, x: next.x.try_into().unwrap(), y: next.y.try_into().unwrap(), });
 

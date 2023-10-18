@@ -8,7 +8,8 @@ fn impersonate(address: ContractAddress) {
 
 #[cfg(test)]
 mod tests {
-    use core::traits::Into;
+    use core::traits::TryInto;
+use core::traits::Into;
     use core::clone::Clone;
     use core::option::OptionTrait;
     use debug::PrintTrait;
@@ -56,10 +57,9 @@ mod tests {
         // it is just the caller
         let caller = starknet::contract_address_const::<0x0>();
 
-        // // check position
-
+        // check position
         let new_position = get!(world, caller, (Position));
-        assert(new_position.x == FixedTrait::from_unscaled_felt(OFFSET + INITIAL_VX), 'position x is wrong');
+        assert(new_position.x == FixedTrait::new(1837019008582407403520_u128, false), 'position x is wrong'); // 99,585
         assert(new_position.y == FixedTrait::from_unscaled_felt(OFFSET + INITIAL_VY), 'position y is wrong');
 
         //check events
@@ -95,7 +95,7 @@ mod tests {
             @starknet::testing::pop_log(world.contract_address)
                 .unwrap() == @Event::Moved(
                     Moved {
-                        player: caller, x: (OFFSET+INITIAL_VX).try_into().unwrap(), y: (OFFSET+INITIAL_VY).try_into().unwrap()
+                        player: caller, x: FixedTrait::new(1837019008582407403520_u128, false).try_into().unwrap(), y: (OFFSET+INITIAL_VY).try_into().unwrap()
                     }
                 ),
             'invalid Moved event 1'
@@ -153,18 +153,6 @@ mod tests {
             'invalid Moved event 0'
         );
 
-        // MOVE
-        // starknet::testing::pop_log_raw(world.contract_address); // unpop Position
-        // assert(
-        //     @starknet::testing::pop_log(world.contract_address)
-        //         .unwrap() == @Event::Moved(
-        //             Moved {
-        //                 player: caller, x: (OFFSET+INITIAL_VX).try_into().unwrap(), y: (OFFSET+INITIAL_VY).try_into().unwrap()
-        //             }
-        //         ),
-        //     'invalid Moved event 1'
-        // );
-
         // TURN
         starknet::testing::pop_log_raw(world.contract_address); // unpop Position
         assert(
@@ -197,8 +185,12 @@ mod tests {
 
         // check final position
         let new_position = get!(world, caller, (Position));
-        assert(new_position.x == FixedTrait::from_unscaled_felt(OFFSET + INITIAL_VX + 0), 'position x is wrong');
-        assert(new_position.y == FixedTrait::from_unscaled_felt(OFFSET + INITIAL_VY + 1), 'position y is wrong');
+        // 'new_position.x'.print();
+        // new_position.x.print();
+        // 'new_position.y'.print();
+        // new_position.y.print();
+        assert(new_position.x == FixedTrait::new(1837019008582407403520_u128, false), 'position x is wrong'); //99,585
+        assert(new_position.y == FixedTrait::new(1837019008582407403520_u128, false), 'position y is wrong'); //99,585
 
         //check events
         // unpop world creation events
@@ -234,10 +226,10 @@ mod tests {
             @starknet::testing::pop_log(world.contract_address)
                 .unwrap() == @Event::Moved(
                     Moved {
-                        player: caller, x: (OFFSET+INITIAL_VX).try_into().unwrap(), y: (OFFSET+INITIAL_VY).try_into().unwrap()
+                        player: caller, x: FixedTrait::new(1837019008582407403520_u128, false).try_into().unwrap(), y: (OFFSET+INITIAL_VY).try_into().unwrap()
                     }
                 ),
-            'invalid Moved event 1'
+            'invalid Moved event 0'
         );
 
         // TURN
@@ -249,7 +241,7 @@ mod tests {
                         player: caller, vx: (0).try_into().unwrap(), vy: (1).try_into().unwrap()
                     }
                 ),
-            'invalid Moved event 1'
+            'invalid Turn event 1'
         );
 
         // MOVE
@@ -258,10 +250,10 @@ mod tests {
             @starknet::testing::pop_log(world.contract_address)
                 .unwrap() == @Event::Moved(
                     Moved {
-                        player: caller, x: (OFFSET+1).try_into().unwrap(), y: (OFFSET+1).try_into().unwrap()
+                        player: caller, x: FixedTrait::new(1837019008582407403520_u128, false).try_into().unwrap(), y: FixedTrait::new(1837019008582407403520_u128, false).try_into().unwrap()
                     }
                 ),
-            'invalid Moved event 1'
+            'invalid Moved event 2'
         );
 
         // // MOVE
