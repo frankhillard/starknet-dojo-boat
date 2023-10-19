@@ -148,10 +148,10 @@ fn compute_angle(v1_x: Fixed, v1_y: Fixed, v2_x: Fixed, v2_y: Fixed) -> Fixed {
     // 'cos'.print();
     // cos.print();
     if (cos < FixedTrait::new_unscaled(1, true)) {
-        'underflow'.print();
+        // 'underflow'.print();
         cos = FixedTrait::new_unscaled(1, true);
     } else if (cos > FixedTrait::new_unscaled(1, false)) {
-        'overflow'.print();
+        // 'overflow'.print();
         cos = FixedTrait::new_unscaled(1, false);
     }
     let angle = FixedTrait::acos(cos);
