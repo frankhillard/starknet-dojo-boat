@@ -87,11 +87,8 @@ mod turn {
         let ty = FixedTrait::from_unscaled_felt(new_vy);
         let mut position = get!(ctx.world, ctx.origin, Position);
         let next = PositionTrait::change_direction(position, tx, ty); 
-        // next.x.print();
-        // next.y.print();
-        // '[move] after step'.print();
         set!(ctx.world, (next));
-        emit!(ctx.world, Turn { player: ctx.origin, vx: next.vx.try_into().unwrap(), vy: next.vy.try_into().unwrap(), });
+        emit!(ctx.world, Turn { player: ctx.origin, vx: next.vx, vy: next.vy, });
 
         return ();
     }

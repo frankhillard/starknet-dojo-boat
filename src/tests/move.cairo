@@ -9,7 +9,7 @@ fn impersonate(address: ContractAddress) {
 #[cfg(test)]
 mod tests {
     use core::traits::TryInto;
-use core::traits::Into;
+    use core::traits::Into;
     use core::clone::Clone;
     use core::option::OptionTrait;
     use debug::PrintTrait;
@@ -159,7 +159,7 @@ use core::traits::Into;
             @starknet::testing::pop_log(world.contract_address)
                 .unwrap() == @Event::Turn(
                     Turn {
-                        player: caller, vx: (0).try_into().unwrap(), vy: (1).try_into().unwrap()
+                        player: caller, vx: FixedTrait::new_unscaled(0, false), vy: FixedTrait::new_unscaled(1, false)
                     }
                 ),
             'invalid Moved event 1'
@@ -185,10 +185,6 @@ use core::traits::Into;
 
         // check final position
         let new_position = get!(world, caller, (Position));
-        // 'new_position.x'.print();
-        // new_position.x.print();
-        // 'new_position.y'.print();
-        // new_position.y.print();
         assert(new_position.x == FixedTrait::new(1837019008582407403520_u128, false), 'position x is wrong'); //99,585
         assert(new_position.y == FixedTrait::new(1837019008582407403520_u128, false), 'position y is wrong'); //99,585
 
@@ -226,7 +222,9 @@ use core::traits::Into;
             @starknet::testing::pop_log(world.contract_address)
                 .unwrap() == @Event::Moved(
                     Moved {
-                        player: caller, x: FixedTrait::new(1837019008582407403520_u128, false).try_into().unwrap(), y: (OFFSET+INITIAL_VY).try_into().unwrap()
+                        player: caller, 
+                        x: FixedTrait::new(1837019008582407403520_u128, false).try_into().unwrap(), 
+                        y: (OFFSET+INITIAL_VY).try_into().unwrap()
                     }
                 ),
             'invalid Moved event 0'
@@ -238,7 +236,7 @@ use core::traits::Into;
             @starknet::testing::pop_log(world.contract_address)
                 .unwrap() == @Event::Turn(
                     Turn {
-                        player: caller, vx: (0).try_into().unwrap(), vy: (1).try_into().unwrap()
+                        player: caller, vx: FixedTrait::new_unscaled(0, false), vy: FixedTrait::new_unscaled(1, false)
                     }
                 ),
             'invalid Turn event 1'
@@ -250,7 +248,9 @@ use core::traits::Into;
             @starknet::testing::pop_log(world.contract_address)
                 .unwrap() == @Event::Moved(
                     Moved {
-                        player: caller, x: FixedTrait::new(1837019008582407403520_u128, false).try_into().unwrap(), y: FixedTrait::new(1837019008582407403520_u128, false).try_into().unwrap()
+                        player: caller, 
+                        x: FixedTrait::new(1837019008582407403520_u128, false).try_into().unwrap(), 
+                        y: FixedTrait::new(1837019008582407403520_u128, false).try_into().unwrap()
                     }
                 ),
             'invalid Moved event 2'
@@ -262,4 +262,74 @@ use core::traits::Into;
         // evt.x.print();
         // evt.y.print();
     }
+
+
+    #[test]
+    #[available_gas(30000000000)]
+    fn test_move_turn_move_move() {
+        let world = setup_world();
+
+        // spawn entity
+        world.execute('spawn', array![]);
+
+        // move entity
+        world.execute('move', array![]);
+        world.execute('turn', array![0, 1]);
+        world.execute('move', array![]);
+        world.execute('move', array![]);
+    
+        // it is just the caller
+        let caller = starknet::contract_address_const::<0x0>();
+
+        // check final position
+        let new_position = get!(world, caller, (Position));
+        assert(new_position.x == FixedTrait::new(1837019008582407403520_u128, false), 'position x is wrong'); //99,585
+        assert(new_position.y == FixedTrait::new(1921597330162407403520_u128, false), 'position y is wrong'); //104,17
+    }
+
+
+    #[test]
+    #[available_gas(30000000000)]
+    fn test_backwind() {
+        let world = setup_world();
+
+        // spawn entity
+        world.execute('spawn', array![]);
+
+        // move entity
+        world.execute('turn', array![1, 1]);
+        world.execute('move', array![]);
+        // world.execute('move', array![]);
+    
+        // it is just the caller
+        let caller = starknet::contract_address_const::<0x0>();
+
+        // check final position
+        let new_position = get!(world, caller, (Position));
+        assert(new_position.x == FixedTrait::new(1803833329241980462635_u128, false), 'position x is wrong'); //95 + 3,94÷√2 = 97,786000718
+        assert(new_position.y == FixedTrait::new(1803833329241980462635_u128, false), 'position y is wrong'); //95 + 3,94÷√2 = 97,786000718
+    }
+
+    #[test]
+    #[available_gas(30000000000)]
+    fn test_frontwind() {
+        let world = setup_world();
+
+        // spawn entity
+        world.execute('spawn', array![]);
+
+        // move entity
+        world.execute('turn', array![-1, -1]);
+        world.execute('move', array![]);
+        // world.execute('move', array![]);
+    
+        // it is just the caller
+        let caller = starknet::contract_address_const::<0x0>();
+
+        // check final position
+        let new_position = get!(world, caller, (Position));
+        assert(new_position.x == FixedTrait::from_unscaled_felt(OFFSET), 'position x is wrong'); //95
+        assert(new_position.y == FixedTrait::from_unscaled_felt(OFFSET), 'position y is wrong'); //95
+    }
+
 }

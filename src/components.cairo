@@ -28,12 +28,22 @@ fn find_interval(values: Span<(Fixed, Fixed)>, angle: Fixed, index: u32) -> (Fix
         )
     } else {
         let (min_angle, min_spd): @(Fixed, Fixed) = values.at(index);
-        let (max_angle, max_spd): @(Fixed, Fixed) = values.at(index + 1);
-        if (angle > min_angle.clone()) && (angle < max_angle.clone()) {
-            (min_angle.clone(), min_spd.clone(), max_angle.clone(), max_spd.clone())
+        if (index + 1 == values.len()) {
+            if (angle == min_angle.clone()) {
+                (min_angle.clone(), min_spd.clone(),min_angle.clone(), min_spd.clone())
+            } else {
+                find_interval(values, angle, index + 1)
+            }
         } else {
-            find_interval(values, angle, index + 1)
+            // lookup next angle
+            let (max_angle, max_spd): @(Fixed, Fixed) = values.at(index + 1);
+            if (angle >= min_angle.clone()) && (angle < max_angle.clone()) {
+                (min_angle.clone(), min_spd.clone(), max_angle.clone(), max_spd.clone())
+            } else {
+                find_interval(values, angle, index + 1)
+            }
         }
+
     }
 }
 
@@ -134,7 +144,16 @@ fn compute_angle(v1_x: Fixed, v1_y: Fixed, v2_x: Fixed, v2_y: Fixed) -> Fixed {
     let v1 = FixedTrait::sqrt(v1_x * v1_x + v1_y * v1_y);
     let v2 = FixedTrait::sqrt(v2_x * v2_x + v2_y * v2_y);
     let dot = v1_x * v2_x + v1_y * v2_y;
-    let cos = dot / (v1 * v2);
+    let mut cos = dot / (v1 * v2);
+    // 'cos'.print();
+    // cos.print();
+    if (cos < FixedTrait::new_unscaled(1, true)) {
+        'underflow'.print();
+        cos = FixedTrait::new_unscaled(1, true);
+    } else if (cos > FixedTrait::new_unscaled(1, false)) {
+        'overflow'.print();
+        cos = FixedTrait::new_unscaled(1, false);
+    }
     let angle = FixedTrait::acos(cos);
     angle
 }
@@ -189,13 +208,6 @@ impl StorageSizeFixed of StorageSize::<Fixed>{
     }
 
 }
-
-// impl SerdeLenFixed of SerdeLen<Fixed> {
-//     #[inline(always)]
-//     fn len() -> usize {
-//         2
-//     }
-// }
 
 #[cfg(test)]
 mod tests {
